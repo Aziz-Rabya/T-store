@@ -12,15 +12,20 @@ export const syncUserCreation = inngest.createFunction(
   async ({ event }) => {
     const { id, first_name, last_name, email_addresses, image_url } = event.data;
 
+    const primaryEmail = email_addresses?.[0]?.email_address;
+
+    const fullName = [first_name, last_name].filter(Boolean).join(" ") || "Anonymous";
+
     const userData = {
       _id: id,
-      email: email_addresses?.[0]?.email_address, // ✅ fixed
-      name: `${first_name || ""} ${last_name || ""}`.trim(),
-      imageUrl: image_url,
+      email: primaryEmail,
+      name: fullName,
+      imageUrl: image_url || "",
     };
 
     await connectDB();
-    await User.create(userData);
+    const user = await User.create(userData);
+    console.log("USER CREATED:", user);
   }
 );
 
